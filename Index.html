@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Feliz Primer Mes | Nuestra Historia</title>
+
+  <!-- Tailwind CSS para diseño responsivo y utilidades -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Playfair Display (editorial romántico) + Plus Jakarta Sans (lectura limpia) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- Configuración personalizada de colores y fuentes -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ivory: '#FDF8F5',
+            blush: '#F6E2E6',
+            roseSoft: '#E8B4BC',
+            burgundy: '#4A2535',
+            burgundyLight: '#6D3B50',
+            champagne: '#D4AF37',
+          },
+          fontFamily: {
+            serif: ['"Playfair Display"', 'Georgia', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    /* Estilos base y animaciones personalizadas */
+    body {
+      background-color: #FDF8F5;
+      color: #4A2535;
+      overflow-x: hidden;
+    }
+
+    /* Fondo ambiental sutil con degradado cálido */
+    .romantic-bg {
+      background: radial-gradient(circle at 15% 20%, rgba(246, 226, 230, 0.85) 0%, rgba(253, 248, 245, 0) 50%),
+                  radial-gradient(circle at 85% 75%, rgba(232, 180, 188, 0.45) 0%, rgba(253, 248, 245, 0) 55%),
+                  #FDF8F5;
+    }
+
+    /* Efecto cristal esmerilado (Glassmorphism) */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      box-shadow: 0 12px 35px -10px rgba(74, 37, 53, 0.08);
+    }
+
+    /* Animación de latido suave para el botón de abrir carta */
+    @keyframes gentlePulse {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 10px 25px -5px rgba(74, 37, 53, 0.25);
+      }
+      50% {
+        transform: scale(1.035);
+        box-shadow: 0 15px 30px -5px rgba(212, 175, 55, 0.4);
+      }
+    }
+    .animate-heartbeat {
+      animation: gentlePulse 2.6s infinite ease-in-out;
+    }
+
+    /* Animación de flotación para pétalos / partículas de luz */
+    @keyframes floatSlow {
+      0% {
+        transform: translateY(0px) rotate(0deg);
+        opacity: 0.35;
+      }
+      50% {
+        transform: translateY(-22px) rotate(12deg);
+        opacity: 0.75;
+      }
+      100% {
+        transform: translateY(0px) rotate(0deg);
+        opacity: 0.35;
+      }
+    }
+    .floating-particle {
+      animation: floatSlow 6s infinite ease-in-out;
+    }
+
+    /* Animación de aparición progresiva al hacer scroll */
+    .reveal-section {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.85s cubic-bezier(0.22, 1, 0.36, 1),
+                  transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .reveal-section.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Tarjetas interactivas con giro / revelado suave */
+    .love-card {
+      transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
+    }
+    .love-card:hover {
+      transform: translateY(-4px);
+    }
+
+    /* Partículas celebratorias al presionar "Te amo" */
+    @keyframes riseAndFade {
+      0% {
+        transform: translateY(0) scale(0.6) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-105vh) scale(1.25) rotate(25deg);
+        opacity: 0;
+      }
+    }
+    .celebration-particle {
+      position: fixed;
+      bottom: -30px;
+      pointer-events: none;
+      z-index: 60;
+      animation: riseAndFade linear forwards;
+    }
+  </style>
+</head>
+<body class="romantic-bg font-sans antialiased selection:bg-roseSoft selection:text-burgundy">
+
+  <!-- ===================================================================== -->
+  <!-- REPRODUCTOR DE TU CANCIÓN PERSONALIZADA (OPCIONAL)                    -->
+  <!-- Instrucciones: Si quieres usar una de las canciones que le hiciste,   -->
+  <!-- pon tu archivo .mp3 en la misma carpeta y cambia src="" abajo.        -->
+  <!-- Mientras tanto, el código reproducirá una melodía ambiental de piano. -->
+  <!-- ===================================================================== -->
+  <audio id="custom-song" loop preload="auto">
+    <!-- Ejemplo: <source src="mi-cancion-para-ella.mp3" type="audio/mpeg"> -->
+  </audio>
+
+  <!-- Canvas o capa de partículas ambientales de fondo -->
+  <div id="ambient-particles" class="fixed inset-0 pointer-events-none z-0 overflow-hidden"></div>
+
+  <!-- Botón flotante de música (esquina superior derecha) -->
+  <button
+    id="music-toggle"
+    onclick="toggleAudio()"
+    aria-label="Activar o silenciar música"
+    class="fixed top-4 right-4 z-50 glass-card px-3.5 py-2.5 rounded-full flex items-center gap-2 text-xs font-medium text-burgundy hover:border-champagne transition-all cursor-pointer shadow-md"
+  >
+    <span id="music-icon" class="text-base">🎵</span>
+    <span id="music-label" class="hidden sm:inline">Música: Pausa</span>
+  </button>
+
+  <!-- ===================================================================== -->
+  <!-- PANTALLA 1: PORTADA / SOBRE DE INVITACIÓN                             -->
+  <!-- ===================================================================== -->
+  <section
+    id="cover-screen"
+    class="fixed inset-0 z-40 flex flex-col items-center justify-center px-6 text-center romantic-bg transition-all duration-1000"
+  >
+    <div class="glass-card max-w-md w-full rounded-3xl p-8 sm:p-11 relative overflow-hidden">
+      <!-- Detalle decorativo dorado superior -->
+      <div class="w-12 h-0.5 bg-champagne/60 mx-auto mb-6 rounded-full"></div>
+
+      <p class="uppercase tracking-[0.25em] text-[11px] font-semibold text-burgundyLight/80 mb-3">
+        21 de Octubre • 21 de Noviembre
+      </p>
+
+      <h1 class="font-serif text-4xl sm:text-5xl font-semibold text-burgundy leading-tight mb-4">
+        Para mi <span class="italic font-normal text-burgundyLight">preciosísima</span>
+      </h1>
+
+      <p class="text-sm sm:text-base text-burgundy/80 leading-relaxed mb-8 font-light">
+        Un pequeño pedacito de nuestra historia, guardado aquí para celebrar nuestro primer mes juntos...
+      </p>
+
+      <!-- Sello / Botón para abrir la carta -->
+      <button
+        id="open-letter-btn"
+        onclick="openExperience()"
+        class="animate-heartbeat w-full sm:w-auto px-8 py-4 rounded-full bg-burgundy text-ivory font-medium text-sm tracking-wide hover:bg-burgundyLight transition-colors flex items-center justify-center gap-2.5 mx-auto cursor-pointer"
+      >
+        <span>Abrir carta</span>
+        <svg class="w-4 h-4 text-champagne" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+      </button>
+
+      <p class="mt-6 text-[11px] text-burgundy/50">
+        Toca para abrir con música suave
+      </p>
+    </div>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- CONTENIDO PRINCIPAL (Se revela al abrir la carta)                     -->
+  <!-- ===================================================================== -->
+  <main id="main-content" class="relative z-10 max-w-2xl mx-auto px-5 pt-20 pb-28 space-y-20 opacity-0 transition-opacity duration-1000">
+
+    <!-- ENCABEZADO Y CONTADOR EN VIVO -->
+    <header class="text-center space-y-6 reveal-section">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blush/80 border border-roseSoft/60 text-xs font-medium text-burgundy">
+        <span class="w-1.5 h-1.5 rounded-full bg-champagne animate-ping"></span>
+        <span>Feliz Primer Mes, Mi Amor</span>
+      </div>
+
+      <h2 class="font-serif text-3xl sm:text-5xl font-semibold text-burgundy leading-tight">
+        Cada segundo desde que <span class="italic font-normal">empezamos</span>
+      </h2>
+
+      <p class="text-sm sm:text-base text-burgundy/75 max-w-md mx-auto font-light">
+        Desde aquel 21 de octubre que cambió mi vida por completo, el tiempo a tu lado se ha vuelto mi lugar favorito.
+      </p>
+
+      <!-- Tarjeta del Contador en Tiempo Real -->
+      <div class="glass-card rounded-3xl p-6 sm:p-8 mt-6">
+        <div class="grid grid-cols-4 gap-2 sm:gap-4 text-center">
+          <div class="bg-ivory/80 rounded-2xl p-3 sm:p-4 border border-blush">
+            <span id="days" class="block font-serif text-2xl sm:text-4xl font-bold text-burgundy">31</span>
+            <span class="text-[11px] sm:text-xs uppercase tracking-wider text-burgundy/65 mt-1 block">Días</span>
+          </div>
+          <div class="bg-ivory/80 rounded-2xl p-3 sm:p-4 border border-blush">
+            <span id="hours" class="block font-serif text-2xl sm:text-4xl font-bold text-burgundy">00</span>
+            <span class="text-[11px] sm:text-xs uppercase tracking-wider text-burgundy/65 mt-1 block">Horas</span>
+          </div>
+          <div class="bg-ivory/80 rounded-2xl p-3 sm:p-4 border border-blush">
+            <span id="minutes" class="block font-serif text-2xl sm:text-4xl font-bold text-burgundy">00</span>
+            <span class="text-[11px] sm:text-xs uppercase tracking-wider text-burgundy/65 mt-1 block">Minutos</span>
+          </div>
+          <div class="bg-ivory/80 rounded-2xl p-3 sm:p-4 border border-blush">
+            <span id="seconds" class="block font-serif text-2xl sm:text-4xl font-bold text-champagne">00</span>
+            <span class="text-[11px] sm:text-xs uppercase tracking-wider text-burgundy/65 mt-1 block">Segundos</span>
+          </div>
+        </div>
+        <p class="text-xs text-burgundy/60 mt-4 italic font-serif">
+          ...y apenas es el primer capítulo de toda nuestra historia.
+        </p>
+      </div>
+    </header>
+
+    <!-- =================================================================== -->
+    <!-- SECCIÓN: LÍNEA DEL TIEMPO INTERACTIVA ("NUESTRA HISTORIA")          -->
+    <!-- =================================================================== -->
+    <section class="space-y-8 reveal-section">
+      <div class="text-center space-y-2">
+        <p class="uppercase tracking-[0.2em] text-xs font-semibold text-champagne">Nuestros Pasos</p>
+        <h3 class="font-serif text-2xl sm:text-4xl font-semibold text-burgundy">
+          Cómo llegamos hasta <span class="italic font-normal">aquí</span>
+        </h3>
+        <p class="text-xs sm:text-sm text-burgundy/70">Toca cada momento para leer nuestro recuerdo</p>
+      </div>
+
+      <!-- Contenedor vertical de la línea del tiempo -->
+      <div class="relative pl-7 sm:pl-9 border-l-2 border-roseSoft/70 space-y-6 ml-2 sm:ml-4">
+
+        <!-- Hito 1: Hot Sale -->
+        <div
+          onclick="toggleMilestone(this)"
+          class="glass-card rounded-2xl p-5 sm:p-6 cursor-pointer transition-all hover:border-champagne relative group"
+        >
+          <!-- Punto en la línea -->
+          <span class="absolute -left-[35px] sm:-left-[43px] top-6 w-4 h-4 rounded-full bg-ivory border-2 border-champagne group-hover:scale-125 transition-transform"></span>
+
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <span class="text-xs font-semibold uppercase tracking-wider text-champagne">Hot Sale • El año pasado</span>
+              <h4 class="font-serif text-lg sm:text-xl font-semibold text-burgundy mt-0.5">El primer cruce</h4>
+            </div>
+            <span class="text-burgundy/50 text-xs group-hover:text-burgundy transition-colors">Ver más ↓</span>
+          </div>
+
+          <p class="milestone-detail text-sm text-burgundy/80 leading-relaxed mt-3 font-light">
+            Donde todo empezó a coincidir y nuestros caminos se encontraron por primera vez. Sin imaginar en ese momento lo importante que te volverías en mi vida.
+          </p>
+        </div>
+
+        <!-- Hito 2: 6 de Julio - Chipinque -->
+        <div
+          onclick="toggleMilestone(this)"
+          class="glass-card rounded-2xl p-5 sm:p-6 cursor-pointer transition-all hover:border-champagne relative group"
+        >
+          <span class="absolute -left-[35px] sm:-left-[43px] top-6 w-4 h-4 rounded-full bg-ivory border-2 border-champagne group-hover:scale-125 transition-transform"></span>
+
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <span class="text-xs font-semibold uppercase tracking-wider text-champagne">6 de Julio</span>
+              <h4 class="font-serif text-lg sm:text-xl font-semibold text-burgundy mt-0.5">Chipinque</h4>
+            </div>
+            <span class="text-burgundy/50 text-xs group-hover:text-burgundy transition-colors">Ver más ↓</span>
+          </div>
+
+          <p class="milestone-detail text-sm text-burgundy/80 leading-relaxed mt-3 font-light">
+            Nuestra primera salida juntos. Entre montañas, aire fresco, pláticas interminables y risas, sin saber aún la hermosa historia que se estaba empezando a escribir.
+          </p>
+        </div>
+
+        <!-- Hito 3: 21 de Octubre - Estado de México -->
+        <div
+          onclick="toggleMilestone(this)"
+          class="glass-card rounded-2xl p-5 sm:p-6 cursor-pointer transition-all hover:border-champagne relative group"
+        >
+          <span class="absolute -left-[35px] sm:-left-[43px] top-6 w-4 h-4 rounded-full bg-burgundy border-2 border-champagne group-hover:scale-125 transition-transform"></span>
+
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <span class="text-xs font-semibold uppercase tracking-wider text-champagne">21 de Octubre</span>
+              <h4 class="font-serif text-lg sm:text-xl font-semibold text-burgundy mt-0.5">Hasta el Estado de México</h4>
+            </div>
+            <span class="text-burgundy/50 text-xs group-hover:text-burgundy transition-colors">Ver más ↓</span>
+          </div>
+
+          <p class="milestone-detail text-sm text-burgundy/80 leading-relaxed mt-3 font-light">
+            La distancia no significó nada comparada con las ganas de verte. El día en que fui por ti hasta el Estado de México y comenzó oficialmente nuestra historia de amor.
+          </p>
+        </div>
+
+        <!-- Hito 4: 21 de Noviembre - Hoy -->
+        <div
+          onclick="toggleMilestone(this)"
+          class="glass-card rounded-2xl p-5 sm:p-6 cursor-pointer border-champagne/60 bg-blush/35 relative group"
+        >
+          <span class="absolute -left-[35px] sm:-left-[43px] top-6 w-4 h-4 rounded-full bg-champagne border-2 border-ivory shadow"></span>
+
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <span class="text-xs font-semibold uppercase tracking-wider text-burgundyLight">21 de Noviembre • Hoy</span>
+              <h4 class="font-serif text-lg sm:text-xl font-semibold text-burgundy mt-0.5">Nuestro Primer Mes</h4>
+            </div>
+            <span class="text-base">✨</span>
+          </div>
+
+          <p class="milestone-detail text-sm text-burgundy/85 leading-relaxed mt-3 font-normal">
+            Celebrando el inicio de lo mejor de mi vida. Treinta y un días de confirmarme que ir por ti fue la mejor decisión que he tomado.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- SECCIÓN: TARJETAS INTERACTIVAS "LO QUE MÁS AMO DE TI"               -->
+    <!-- =================================================================== -->
+    <section class="space-y-8 reveal-section">
+      <div class="text-center space-y-2">
+        <p class="uppercase tracking-[0.2em] text-xs font-semibold text-champagne">Razones</p>
+        <h3 class="font-serif text-2xl sm:text-4xl font-semibold text-burgundy">
+          Lo que más <span class="italic font-normal">amo de ti</span>
+        </h3>
+        <p class="text-xs sm:text-sm text-burgundy/70">Toca cada tarjeta para descubrir el mensaje</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <!-- Tarjeta 1: Sus ojos -->
+        <div
+          onclick="revealLoveCard(this)"
+          class="love-card glass-card rounded-3xl p-6 text-center cursor-pointer flex flex-col items-center justify-center min-h-[210px] relative overflow-hidden"
+        >
+          <div class="card-front flex flex-col items-center space-y-3">
+            <div class="w-12 h-12 rounded-full bg-blush flex items-center justify-center text-burgundy">
+              <!-- Icono SVG de ojo / brillo -->
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <h4 class="font-serif text-lg font-semibold text-burgundy">Tus ojos preciosos</h4>
+            <span class="text-[11px] uppercase tracking-widest text-champagne font-medium">Toca para abrir</span>
+          </div>
+
+          <div class="card-back hidden space-y-2 animate-fadeIn">
+            <h4 class="font-serif text-base font-semibold text-burgundy italic">Tus ojos preciosos</h4>
+            <p class="text-sm text-burgundy/85 leading-relaxed font-light">
+              “Esos ojos en los que me pierdo cada vez que me miras y que dicen más que mil palabras.”
+            </p>
+          </div>
+        </div>
+
+        <!-- Tarjeta 2: Su sonrisa -->
+        <div
+          onclick="revealLoveCard(this)"
+          class="love-card glass-card rounded-3xl p-6 text-center cursor-pointer flex flex-col items-center justify-center min-h-[210px] relative overflow-hidden"
+        >
+          <div class="card-front flex flex-col items-center space-y-3">
+            <div class="w-12 h-12 rounded-full bg-blush flex items-center justify-center text-burgundy">
+              <!-- Icono SVG de destello / luz -->
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+              </svg>
+            </div>
+            <h4 class="font-serif text-lg font-semibold text-burgundy">Tu sonrisa brillante</h4>
+            <span class="text-[11px] uppercase tracking-widest text-champagne font-medium">Toca para abrir</span>
+          </div>
+
+          <div class="card-back hidden space-y-2">
+            <h4 class="font-serif text-base font-semibold text-burgundy italic">Tu sonrisa brillante</h4>
+            <p class="text-sm text-burgundy/85 leading-relaxed font-light">
+              “Esa sonrisa que ilumina mi camino incluso en los días más largos y lo cambia todo al instante.”
+            </p>
+          </div>
+        </div>
+
+        <!-- Tarjeta 3: Mi fuerza -->
+        <div
+          onclick="revealLoveCard(this)"
+          class="love-card glass-card rounded-3xl p-6 text-center cursor-pointer flex flex-col items-center justify-center min-h-[210px] relative overflow-hidden"
+        >
+          <div class="card-front flex flex-col items-center space-y-3">
+            <div class="w-12 h-12 rounded-full bg-blush flex items-center justify-center text-burgundy">
+              <!-- Icono SVG de corazón -->
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+              </svg>
+            </div>
+            <h4 class="font-serif text-lg font-semibold text-burgundy">Mi fuerza</h4>
+            <span class="text-[11px] uppercase tracking-widest text-champagne font-medium">Toca para abrir</span>
+          </div>
+
+          <div class="card-back hidden space-y-2">
+            <h4 class="font-serif text-base font-semibold text-burgundy italic">Mi fuerza</h4>
+            <p class="text-sm text-burgundy/85 leading-relaxed font-light">
+              “Contigo a mi lado siento que puedo con absolutamente todo lo que venga.”
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- SECCIÓN FINAL: CARTA DE PRIMER MES Y CELEBRACIÓN                    -->
+    <!-- =================================================================== -->
+    <section class="reveal-section">
+      <div class="glass-card rounded-3xl p-7 sm:p-11 text-center space-y-6 relative overflow-hidden">
+        <div class="w-14 h-0.5 bg-champagne/60 mx-auto rounded-full"></div>
+
+        <h3 class="font-serif text-2xl sm:text-4xl font-semibold text-burgundy">
+          Feliz primer mes, <span class="italic font-normal">mi amor</span>
+        </h3>
+
+        <div class="space-y-4 text-sm sm:text-base text-burgundy/85 leading-relaxed font-light max-w-lg mx-auto text-left sm:text-center">
+          <p>
+            Hoy cumplimos nuestro primer mes juntos y no quería dejar pasar este día sin recordarte lo feliz que me haces.
+          </p>
+          <p>
+            Desde que nos cruzamos por primera vez, pasando por aquella salida a Chipinque y hasta el día en que fui por ti al Estado de México, cada momento me ha demostrado que contigo vale la pena cualquier kilómetro y cualquier esfuerzo.
+          </p>
+          <p>
+            Gracias por tus ojos preciosos, por esa sonrisa que ilumina mi camino todos los días y por hacerme sentir que juntos podemos con absolutamente todo.
+          </p>
+        </div>
+
+        <div class="pt-4">
+          <button
+            id="love-celebration-btn"
+            onclick="triggerCelebration()"
+            class="px-9 py-4 rounded-full bg-burgundy text-ivory font-medium text-base tracking-wide shadow-lg hover:bg-burgundyLight active:scale-95 transition-all cursor-pointer inline-flex items-center gap-2.5"
+          >
+            <span>Te amo</span>
+            <span class="text-lg">❤️</span>
+          </button>
+        </div>
+
+        <!-- Mensaje sorpresa que aparece al tocar "Te amo" -->
+        <div
+          id="final-toast"
+          class="hidden mt-4 p-4 rounded-2xl bg-blush/90 border border-champagne/40 text-burgundy text-sm font-serif italic transition-all"
+        >
+          “Por este primer mes y por todos los que nos faltan por vivir juntos. Te amo muchísimo.” ✨
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- LÓGICA DE INTERACTIVIDAD, CONTADOR Y MÚSICA AMBIENTAL                 -->
+  <!-- ===================================================================== -->
+  <script>
+    // 1. CONFIGURACIÓN DE LA FECHA DE INICIO (21 de Octubre de 2026)
+    const START_DATE = new Date('2026-10-21T00:00:00');
+
+    // 2. ACTUALIZACIÓN DEL CONTADOR EN TIEMPO REAL
+    function updateLoveCounter() {
+      const now = new Date();
+      const diff = now - START_DATE;
+
+      // Si por alguna razón la fecha del sistema es anterior, evitamos números negativos
+      const safeDiff = Math.max(0, diff);
+
+      const days = Math.floor(safeDiff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((safeDiff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((safeDiff / 1000 / 60) % 60);
+      const seconds = Math.floor((safeDiff / 1000) % 60);
+
+      document.getElementById('days').textContent = String(days).padStart(2, '0');
+      document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+      document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+      document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+    }
+
+    setInterval(updateLoveCounter, 1000);
+    updateLoveCounter();
+
+    // 3. GENERADOR DE PARTÍCULAS AMBIENTALES SUAVES DE FONDO
+    function createAmbientParticles() {
+      const container = document.getElementById('ambient-particles');
+      const count = 18;
+      for (let i = 0; i < count; i++) {
+        const dot = document.createElement('div');
+        const size = Math.random() * 10 + 6;
+        dot.className = 'floating-particle rounded-full absolute';
+        dot.style.width = `${size}px`;
+        dot.style.height = `${size}px`;
+        dot.style.left = `${Math.random() * 100}%`;
+        dot.style.top = `${Math.random() * 100}%`;
+        dot.style.background = i % 2 === 0
+          ? 'rgba(232, 180, 188, 0.35)'
+          : 'rgba(212, 175, 55, 0.22)';
+        dot.style.animationDelay = `${Math.random() * 5}s`;
+        dot.style.animationDuration = `${6 + Math.random() * 5}s`;
+        container.appendChild(dot);
+      }
+    }
+    createAmbientParticles();
+
+    // 4. SISTEMA DE AUDIO (Soporta canción propia MP3 o sintetizador ambiental suave)
+    let audioCtx = null;
+    let isPlaying = false;
+    let synthInterval = null;
+
+    // Notas suaves tipo caja musical / piano cálido (Acordes en Fa Mayor / Do Mayor)
+    const melodyNotes = [
+      261.63, 329.63, 392.00, 493.88, // Cmaj7
+      220.00, 261.63, 329.63, 392.00, // Am7
+      174.61, 220.00, 261.63, 329.63, // Fmaj7
+      196.00, 246.94, 293.66, 392.00  // G6
+    ];
+    let noteIndex = 0;
+
+    function playSoftNote(freq) {
+      if (!audioCtx || !isPlaying) return;
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now);
+
+      // Envolvente suave sin clics bruscos
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.045, now + 0.15);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.4);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start(now);
+      osc.stop(now + 2.5);
+    }
+
+    function startMusic() {
+      const customAudio = document.getElementById('custom-song');
+      const hasCustomSource = customAudio.querySelector('source') && customAudio.querySelector('source').getAttribute('src');
+
+      if (hasCustomSource) {
+        customAudio.volume = 0.65;
+        customAudio.play().catch(() => {});
+      } else {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        if (!synthInterval) {
+          playSoftNote(melodyNotes[noteIndex % melodyNotes.length]);
+          noteIndex++;
+          synthInterval = setInterval(() => {
+            if (isPlaying) {
+              playSoftNote(melodyNotes[noteIndex % melodyNotes.length]);
+              noteIndex++;
+            }
+          }, 950);
+        }
+      }
+
+      isPlaying = true;
+      updateMusicUI();
+    }
+
+    function stopMusic() {
+      const customAudio = document.getElementById('custom-song');
+      customAudio.pause();
+      isPlaying = false;
+      updateMusicUI();
+    }
+
+    function toggleAudio() {
+      if (isPlaying) {
+        stopMusic();
+      } else {
+        startMusic();
+      }
+    }
+
+    function updateMusicUI() {
+      const icon = document.getElementById('music-icon');
+      const label = document.getElementById('music-label');
+      if (isPlaying) {
+        icon.textContent = '🎶';
+        label.textContent = 'Música: Activa';
+      } else {
+        icon.textContent = '🎵';
+        label.textContent = 'Música: Pausa';
+      }
+    }
+
+    // 5. ABRIR LA EXPERIENCIA DESDE LA PORTADA
+    function openExperience() {
+      const cover = document.getElementById('cover-screen');
+      const main = document.getElementById('main-content');
+
+      // Inicia la música al primer toque del usuario
+      startMusic();
+
+      // Desvanece la portada
+      cover.style.opacity = '0';
+      cover.style.transform = 'scale(1.04)';
+      cover.style.pointerEvents = 'none';
+
+      setTimeout(() => {
+        cover.style.display = 'none';
+        main.classList.remove('opacity-0');
+        triggerScrollReveal();
+      }, 850);
+    }
+
+    // 6. ANIMACIÓN AL HACER SCROLL (IntersectionObserver)
+    function triggerScrollReveal() {
+      const sections = document.querySelectorAll('.reveal-section');
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+            }
+          });
+        },
+        { threshold: 0.12 }
+      );
+      sections.forEach((sec) => observer.observe(sec));
+    }
+
+    // 7. INTERACCIÓN DE HITOS EN LA LÍNEA DEL TIEMPO
+    function toggleMilestone(card) {
+      const detail = card.querySelector('.milestone-detail');
+      detail.classList.toggle('hidden');
+    }
+
+    // 8. INTERACCIÓN DE TARJETAS "LO QUE MÁS AMO DE TI"
+    function revealLoveCard(card) {
+      const front = card.querySelector('.card-front');
+      const back = card.querySelector('.card-back');
+      const isRevealed = !back.classList.contains('hidden');
+
+      if (isRevealed) {
+        back.classList.add('hidden');
+        front.classList.remove('hidden');
+        card.classList.remove('border-champagne');
+      } else {
+        front.classList.add('hidden');
+        back.classList.remove('hidden');
+        card.classList.add('border-champagne');
+      }
+    }
+
+    // 9. EFECTO MÁGICO DE CELEBRACIÓN AL TOCAR "TE AMO"
+    function triggerCelebration() {
+      const toast = document.getElementById('final-toast');
+      toast.classList.remove('hidden');
+
+      const symbols = ['❤️', '✨', '💖', '🌸', '💛'];
+      const totalParticles = 36;
+
+      for (let i = 0; i < totalParticles; i++) {
+        const particle = document.createElement('span');
+        particle.className = 'celebration-particle';
+        particle.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+        particle.style.left = `${Math.random() * 96 + 2}vw`;
+        particle.style.fontSize = `${Math.random() * 18 + 16}px`;
+        particle.style.animationDuration = `${Math.random() * 2.5 + 2.8}s`;
+        particle.style.animationDelay = `${Math.random() * 0.6}s`;
+
+        document.body.appendChild(particle);
+
+        setTimeout(() => {
+          particle.remove();
+        }, 5500);
+      }
+    }
+  </script>
+</body>
+</html>
